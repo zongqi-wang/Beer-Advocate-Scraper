@@ -12,11 +12,8 @@ class BeerSpiderSpider(scrapy.Spider):
     ###########################################################################
     # Description: This function gets all the beer
     def start_requests(self):
-        start_urls = [
-            'http://www.beeradvocate.com/beer/profile/100',
-            'http://www.beeradvocate.com/beer/profile/1',
-        ]
-        for brewerynumber in range(1,10):
+        start_urls = []
+        for brewerynumber in range(100,103):
             start_urls.append(f'http://www.beeradvocate.com/beer/profile/{brewerynumber}')
 
         for url in start_urls:
@@ -33,8 +30,12 @@ class BeerSpiderSpider(scrapy.Spider):
             yield{
                 'brewery_name': response.css('h1').re('> (.*)</s'),
                 'beer_name': response.css('h1').re('>(.*)<s'),
-                'comment': comment.css('#rating_fullview_content_2').extract(),
+                'comment': comment.css('#rating_fullview_content_2').extract_first(),
             }
+        
+        next_page =  response.css('a').re('<a href="(.*)">next')
+        if next_page:
+            yield response.follow(next_page[0], self.parse_comment)
 
         
 
