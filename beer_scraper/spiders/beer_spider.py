@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 import scrapy
+from scrapy import Spider
+from scrapy.contrib.spiders import CrawlSpider, Rule
+from scrapy.contrib.linkextractors import LinkExtractor
 
 
 class BeerSpiderSpider(scrapy.Spider):
@@ -10,21 +13,19 @@ class BeerSpiderSpider(scrapy.Spider):
     # Description: This function gets all the beer
     def start_requests(self):
         start_urls = [
-            'http://www.beeradvocate.com/beer/profile/100'
-            'http://www.beeradvocate.com/beer/profile/1'
+            'http://www.beeradvocate.com/beer/profile/100',
+            'http://www.beeradvocate.com/beer/profile/1',
         ]
-        #for brewerynumber in range(1,10):
-        #    start_urls.extend(f'http://www.beeradvocate.com/beer/profile/{brewerynumber}')
+        for brewerynumber in range(1,10):
+            start_urls.append(f'http://www.beeradvocate.com/beer/profile/{brewerynumber}')
 
         for url in start_urls:
-            yield scrapy.Request(url=url, callback=self.parse_beer)
+            yield scrapy.Request(url=url, callback=self.parse)
 
 
-    def parse_beer(self, response):
-        urls = response.css('td.hr_bottom_light a').re('"(.*profile.*)"')
-
-        for url in urls:
-            response.follow(url, self.parse_comment)
+    def parse(self, response):
+        for url in response.css('td.hr_bottom_light a').re('"(.*profile.*)"'):
+            yield response.follow(url, self.parse_comment)
 
     
     def parse_comment(self, response):
