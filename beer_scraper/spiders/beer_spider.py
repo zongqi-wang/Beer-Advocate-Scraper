@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from scrapy import Spider
-from scrapy.contrib.spiders import CrawlSpider, Rule
-from scrapy.contrib.linkextractors import LinkExtractor
 
 
 class BeerSpiderSpider(scrapy.Spider):
@@ -13,7 +10,7 @@ class BeerSpiderSpider(scrapy.Spider):
     # Description: This function gets all the beer
     def start_requests(self):
         start_urls = []
-        for brewerynumber in range(100,103):
+        for brewerynumber in range(10,103):
             start_urls.append(f'http://www.beeradvocate.com/beer/profile/{brewerynumber}')
 
         for url in start_urls:
