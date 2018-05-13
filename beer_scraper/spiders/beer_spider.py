@@ -9,12 +9,7 @@ class BeerSpiderSpider(scrapy.Spider):
     ###########################################################################
     # Description: This function gets all the beer
     def start_requests(self):
-        start_urls = []
-        for brewerynumber in range(10,103):
-            start_urls.append(f'http://www.beeradvocate.com/beer/profile/{brewerynumber}')
-
-        for url in start_urls:
-            yield scrapy.Request(url=url, callback=self.parse)
+        start_urls['']
 
 
     def parse(self, response):
