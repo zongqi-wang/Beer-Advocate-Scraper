@@ -6,15 +6,12 @@ class BeerSpiderSpider(scrapy.Spider):
     name = 'beer_comments'
     allowed_domains = ['beeradvocate.com']
 
-    ###########################################################################
-    # Description: This function gets all the beer
-    def start_requests(self):
-        start_urls['']
+    start_urls = ['https://www.beeradvocate.com/beer/']
 
 
     def parse(self, response):
-        for url in response.css('td.hr_bottom_light a').re('"(.*profile.*)"'):
-            yield response.follow(url, self.parse_comment)
+        for beer in response.css('#rating_fullview_content_2'):
+            yield response.follow(beers.css('h6 a').re('href="(.*)">'),self.parse_comment)
 
     
     def parse_comment(self, response):
