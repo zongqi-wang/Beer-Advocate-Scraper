@@ -64,9 +64,10 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'beer_scraper.pipelines.BeerScraperPipeline': 300,
-#}
+ITEM_PIPELINES = {
+    'beer_scraper.pipelines.MultiCSVItemPipeline': 300,
+    'beer_scraper.pipelines.DuplicatesPipeline': 100,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html

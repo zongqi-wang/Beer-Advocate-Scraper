@@ -16,9 +16,9 @@ class BeerSpiderSpider(scrapy.Spider):
         for beer in response.css('#rating_fullview_content_2 h6 a').re('href="(.*)">'):
             yield response.follow(beer, self.parse_comment)
         
-        #next_page =  response.css('a').re('<a href="(.*)">next')
-        #if next_page:
-        #    yield response.follow(next_page[0], self.parse)
+        next_page =  response.css('a').re('<a href="(.*)">next')
+        if next_page:
+            yield response.follow(next_page[0], self.parse)
     
     def parse_comment(self, response):
         info = BeerInfoItem()
@@ -45,10 +45,10 @@ class BeerSpiderSpider(scrapy.Spider):
             item['comment'] = comment.css('#rating_fullview_content_2').extract_first() 
             yield item
        
-        #next_page =  response.css('a').re('<a href="(.*)">next')
-        #if next_page:
-        #    next_url = re.sub('&amp;', '&', next_page[0])
-        #    yield response.follow(next_url, self.parse_comment)
+        next_page =  response.css('a').re('<a href="(.*)">next')
+        if next_page:
+            next_url = re.sub('&amp;', '&', next_page[0])
+            yield response.follow(next_url, self.parse_comment)
 
         
 
