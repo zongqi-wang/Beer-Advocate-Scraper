@@ -10,9 +10,8 @@ class BeerSpiderSpider(scrapy.Spider):
 
 
     def parse(self, response):
-        for beer in response.css('#rating_fullview_content_2'):
-            url = beer.css('h6 a').re('href="(.*)">')
-            yield response.follow(url, self.parse_comment)
+        for beer in response.css('#rating_fullview_content_2 h6 a').re('href="(.*)">'):
+            yield response.follow(beer, self.parse_comment)
             
 
     
