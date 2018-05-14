@@ -8,12 +8,8 @@
 import scrapy
 
 
-class BeerScraperItem(scrapy.Item):
-    # define the fields for your item here like:
-    beer_name = scrapy.Field()
+class CommentItem(scrapy.Item):
     beer_number = scrapy.Field() 
-    brewery_name = scrapy.Field()
-    brewery_number = scrapy.Field()
     comment = scrapy.Field()    
 
 class BeerInfoItem(scrapy.Item):
@@ -22,5 +18,6 @@ class BeerInfoItem(scrapy.Item):
     brewery_name = scrapy.Field()
     brewery_number = scrapy.Field()
     style = scrapy.Field()
-    ABV = scrapy.Field(()
-    availablility = 
+    ABV = scrapy.Field()
+    availability = scrapy.Field()
+    notes = scrapy.Field()
