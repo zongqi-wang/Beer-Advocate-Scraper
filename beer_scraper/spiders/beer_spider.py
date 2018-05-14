@@ -11,20 +11,24 @@ class BeerSpiderSpider(scrapy.Spider):
 
     def parse(self, response):
         for beer in response.css('#rating_fullview_content_2'):
-            yield response.follow(beers.css('h6 a').re('href="(.*)">'),self.parse_comment)
+            url = beer.css('h6 a').re('href="(.*)">')
+            yield response.follow(url, self.parse_comment)
+            
 
     
     def parse_comment(self, response):
-        for comment in response.css('#rating_fullview_content_2'):
-            yield{
-                'brewery_name': response.css('h1').re('> (.*)</s'),
-                'beer_name': response.css('h1').re('>(.*)<s'),
-                'comment': comment.css('#rating_fullview_content_2').extract_first(),
-            }
-        
-        next_page =  response.css('a').re('<a href="(.*)">next')
-        if next_page:
-            yield response.follow(next_page[0], self.parse_comment)
+        print(response.url)
+    #def parse_comment(self, response):
+    #    for comment in response.css('#rating_fullview_content_2'):
+    #        yield{
+    #            'brewery_name': response.css('h1').re('> (.*)</s'),
+    #            'beer_name': response.css('h1').re('>(.*)<s'),
+    #            'comment': comment.css('#rating_fullview_content_2').extract_first(),
+    #        }
+    #    
+    #    next_page =  response.css('a').re('<a href="(.*)">next')
+    #    if next_page:
+    #        yield response.follow(next_page[0], self.parse_comment)
 
         
 
