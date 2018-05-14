@@ -12,6 +12,11 @@ class BeerSpiderSpider(scrapy.Spider):
     def parse(self, response):
         for beer in response.css('#rating_fullview_content_2 h6 a').re('href="(.*)">'):
             yield response.follow(beer, self.parse_comment)
+        
+        next_page =  response.css('a').re('<a href="(.*)">next')
+        if next_page:
+            yield response.follow(next_page[0], self.parse)
+
             
 
     
