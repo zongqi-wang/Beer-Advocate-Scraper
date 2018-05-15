@@ -37,20 +37,20 @@ class MultiCSVItemPipeline(object):
     SaveTypes = ['comment', 'beerinfo', 'breweryinfo']
 
     def open_spider(self, spider):
-        self.year_to_exporter = {}
+        self.type_to_exporter = {}
 
     def close_spider(self, spider):
-        for exporter in self.year_to_exporter.values():
+        for exporter in self.type_to_exporter.values():
             exporter.finish_exporting()
 
     def _exporter_for_item(self, item):
         name = item_type(item)
-        if name not in self.year_to_exporter:
+        if name not in self.type_to_exporter:
             f = open('{}.csv'.format(name), 'wb')
             exporter = CsvItemExporter(f)
             exporter.start_exporting()
-            self.year_to_exporter[name] = exporter
-        return self.year_to_exporter[name]
+            self.type_to_exporter[name] = exporter
+        return self.type_to_exporter[name]
 
     def process_item(self, item, spider):
         exporter = self._exporter_for_item(item)
