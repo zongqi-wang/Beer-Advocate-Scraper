@@ -34,7 +34,7 @@ class DuplicatesPipeline(object):
 
 
 class MultiCSVItemPipeline(object):
-    SaveTypes = ['comment', 'beerinfo']
+    SaveTypes = ['comment', 'beerinfo', 'breweryinfo']
 
     def open_spider(self, spider):
         self.year_to_exporter = {}

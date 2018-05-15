@@ -9,7 +9,7 @@ import scrapy
 import re
 from beer_scraper.items import CommentItem
 from beer_scraper.items import BeerInfoItem
-
+from beer_scraper.items import BreweryInfoItem
 
 class BeerSpiderSpider(scrapy.Spider):
     name = 'beer_comments'
@@ -17,23 +17,55 @@ class BeerSpiderSpider(scrapy.Spider):
     
     start_urls = ['https://www.beeradvocate.com/place/list/?start=0&&brewery=Y&sort=name']
 
+    ############################################################################
     #this function finds every brewery in the page and goes to the next page
+    ############################################################################
     def parse(self, response):
         for brewery in response.css('td a').re('href="(/beer/profile/.*)">'):
             yield response.follow(brewery, self.parse_brewery)
         
-        # next_page =  response.css('a').re('<a href="(.*)">next')
-        # if next_page:
-        #     next_url = re.sub('&amp;', '&', next_page[0])
-        #     yield response.follow(next_url, self.parse)
+        next_page =  response.css('a').re('<a href="(.*)">next')
+        if next_page:
+            next_url = re.sub('&amp;', '&', next_page[0])
+            yield response.follow(next_url, self.parse)
+
+
     
+    #############################################################################   
     #this function finds all the beers in breweries page
+    #############################################################################
     def parse_brewery(self, response):
-        for beer in response.css('td.hr_bottom_light a').re('href="(/beer/profile/.*)">'):
-            yield response.follow(beer, self.parse_comment)
+        stats = response.css('#item_stats dd::text').extract()
+        #don't record information if 
+        if stats[0]>0:
+            brewery_info = BreweryInfoItem()
+            #beer stats
+            brewery_info['beers'] = stats[0]
+            brewery_info['beer_reviews'] = stats[1]
+            brewery_info['beer_ratings'] = stats[2]
+            brewery_info['beer_score'] = response.css('#score_box span.ba-ravg::text').extract()
+            #brewery stats
+            brewery_info['brewery_score']
+            brewery_info['brewery_review']
+            brewery_info['brewery_ratings']
+            brewery_info['brewery_pdev']
+            #getting location data
+            location = response.css('#info_box a').re('/place/.*>(.*)</a>')
+            brewery_info['city'] = location[0]
+            brewery_info['country'] = location[-1]
+            if len(location)>2:
+                brewery_info['province'] = location[-2]
         
-    #this function finds all the comments and parse them and stores them as items to be 
-    #used in item pipeline for exporting
+            for beer in response.css('td.hr_bottom_light a').re('href="(/beer/profile/.*)">'):
+                yield response.follow(beer, self.parse_comment)
+        else:
+            pass
+
+
+    #############################################################################
+    #this function finds all the comments and parse them and stores them as items  
+    #to be used in item pipeline for exporting
+    #############################################################################
     def parse_comment(self, response):
         #beer info
         info = BeerInfoItem()
@@ -46,12 +78,6 @@ class BeerSpiderSpider(scrapy.Spider):
         info['brewery_name'] = response.css('h1').re('\| (.*)</s')
         info['beer_name'] =response.css('h1').re('>(.*)<s')
 
-        #getting location data
-        location = response.css('#info_box a').re('/place/.*>(.*)</a>')
-        info['city'] = location[0]
-        info['country'] = location[-1]
-        if len(location)>2:
-            info['province'] = location[-2]
         
         #style
         style = response.css("div #info_box a b").extract()
@@ -59,17 +85,33 @@ class BeerSpiderSpider(scrapy.Spider):
             style = style[1]
             style = re.sub('<(b|/b)>', '', style)
             info['style'] = style
-        info['ABV']=response.css('#info_box').re('/b> (.*%)\n\t\t<br>')
-        avail = response.css('#info_box').re('</b>(.*)\n\t\t<br>')
-        info['availability'] = avail
+        info['abv']=response.css('#info_box').re('/b> (.*%)\n\t\t<br>')
+        info['availability'] = response.css('#info_box').re('Availability:</b>(.*)\n\t\t')
         info['notes'] = response.css('#info_box').re('<br>\n\t\t(.*)<br>')
+        info['ba_score'] = response.css('#score_box span.ba-ravg::text').extract()
+        info['ranking'] = response.css('#item_stats dd::text').extract_first()
+        info['reviews'] = response.css('#item_stats dd span.ba-reviews::text').extract_first()
+        info['ratings'] = response.css('#item_stats dd span.ba-ratings::text').extract_first()
+        pdev = response.css('#item_stats dd span.ba-pdev::text').extract_first()
+        info['pdev'] = re.sub('[\n\t]*', '', pdev)
         yield info
 
         #parsing comments
         for comment in response.css('#rating_fullview_content_2'):
             item = CommentItem()
             item['beer_number'] = url_list[-2]
-            item['comment'] = comment.css('#rating_fullview_content_2').extract_first() 
+            item['ba_score'] = comment.css('#rating_fullview_content_2 span.BAscore_norm::text').extract()
+            item['rdev'] = comment.css('#rating_fullview_content_2 span').re('0000\;">(.*)</span')
+            #scores
+            scores = comment.css('#rating_fullview_content_2 span.muted::text').extract()
+            item['look'] = re.search('look: ([0-9\.]*) \|', scores).group(1)
+            item['smell'] = re.search('smell: ([0-9\.]*) \|', scores).group(1)
+            item['taste'] = re.search('taste: ([0-9\.]*) \|', scores).group(1)
+            item['feel'] = re.search('feel: ([0-9\.]*) \|', scores).group(1)
+            item['overall'] = re.search('overall: ([0-9\.]*)', scores).group(1)
+            item['comment'] = comment.css('#rating_fullview_content_2::text').extract() 
+            item['username'] = comment.css('div#rating_fullview_content_2 span.muted a.username::text').extract()
+            item['date'] = comment.css('div#rating_fullview_content_2 span.muted a::text').extract()[1]
             yield item
        
         #crawling next page if exist
