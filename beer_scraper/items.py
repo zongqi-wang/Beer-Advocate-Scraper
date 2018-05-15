@@ -8,7 +8,6 @@
 import scrapy
 
 
-<<<<<<< HEAD
 class CommentItem(scrapy.Item):
     beer_number = scrapy.Field() 
     comment = scrapy.Field()    
@@ -22,9 +21,11 @@ class BeerInfoItem(scrapy.Item):
     ABV = scrapy.Field()
     availability = scrapy.Field()
     notes = scrapy.Field()
-=======
-class BeerScraperItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
->>>>>>> origin/master
+
+class BreweryInfoItem(scrapy.Item):
+    brewery_name = scrapy.Field()
+    brewery_number = scrapy.Field()
+    city = scrapy.Field()
+    province = scrapy.Field()
+    country = scrapy.Field()
+    BA_score = scrapy.Field()
