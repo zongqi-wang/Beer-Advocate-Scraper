@@ -24,10 +24,10 @@ class BeerSpiderSpider(scrapy.Spider):
         for brewery in response.css('td a').re('href="(/beer/profile/.*)">'):
             yield response.follow(brewery, self.parse_brewery)
         
-        # next_page =  response.css('a').re('<a href="(.*)">next')
-        # if next_page:
-        #     next_url = re.sub('&amp;', '&', next_page[0])
-        #     yield response.follow(next_url, self.parse)
+        next_page =  response.css('a').re('<a href="(.*)">next')
+        if next_page:
+            next_url = re.sub('&amp;', '&', next_page[0])
+            yield response.follow(next_url, self.parse)
 
 
     
@@ -37,7 +37,7 @@ class BeerSpiderSpider(scrapy.Spider):
     def parse_brewery(self, response):
         stats = response.css('#item_stats dd::text').extract()
         #don't record information if 
-        if not stats[0]=='0':
+        if stats[0]!='0':
             brewery_info = BreweryInfoItem()
             #brewery info
             brewery_info['brewery_name'] = response.css('h1::text').extract()
@@ -59,7 +59,9 @@ class BeerSpiderSpider(scrapy.Spider):
             brewery_info['country'] = location[-1]
             if len(location)>2:
                 brewery_info['province'] = location[-2]
-        
+            #saving info
+            yield brewery_info
+
             for beer in response.css('td.hr_bottom_light a').re('href="(/beer/profile/.*)">'):
                 yield response.follow(beer, self.parse_comment)
         else:
@@ -113,7 +115,11 @@ class BeerSpiderSpider(scrapy.Spider):
             item['taste'] = re.search('taste: ([0-9\.]*) \|', scores).group(1)
             item['feel'] = re.search('feel: ([0-9\.]*) \|', scores).group(1)
             item['overall'] = re.search('overall: ([0-9\.]*)', scores).group(1)
-            item['comment'] = comment.css('#rating_fullview_content_2::text').extract() 
+
+            comment_text = comment.css('#rating_fullview_content_2').extract_first()
+            comment_text = re.sub('<div id="rating.*</span><br><br>','',comment_text)
+            item['comment'] = re.sub('<div><span class.*', '', comment_text)
+
             item['username'] = comment.css('div#rating_fullview_content_2 span.muted a.username::text').extract()
             item['date'] = comment.css('div#rating_fullview_content_2 span.muted a::text').extract()[1]
             yield item
