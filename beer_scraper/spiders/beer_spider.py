@@ -110,11 +110,12 @@ class BeerSpiderSpider(scrapy.Spider):
             item['rdev'] = comment.css('#rating_fullview_content_2 span').re('0000\;">(.*)</span')
             #scores
             scores = comment.css('#rating_fullview_content_2 span.muted::text').extract_first()
-            item['look'] = re.search('look: ([0-9\.]*) \|', scores).group(1)
-            item['smell'] = re.search('smell: ([0-9\.]*) \|', scores).group(1)
-            item['taste'] = re.search('taste: ([0-9\.]*) \|', scores).group(1)
-            item['feel'] = re.search('feel: ([0-9\.]*) \|', scores).group(1)
-            item['overall'] = re.search('overall: ([0-9\.]*)', scores).group(1)
+            if scores:
+                item['look'] = re.search('look: ([0-9\.]*) \|', scores).group(1)
+                item['smell'] = re.search('smell: ([0-9\.]*) \|', scores).group(1)
+                item['taste'] = re.search('taste: ([0-9\.]*) \|', scores).group(1)
+                item['feel'] = re.search('feel: ([0-9\.]*) \|', scores).group(1)
+                item['overall'] = re.search('overall: ([0-9\.]*)', scores).group(1)
 
             comment_text = comment.css('#rating_fullview_content_2').extract_first()
             comment_text = re.sub('<div id="rating.*</span><br><br>','',comment_text)
