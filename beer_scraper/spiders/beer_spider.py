@@ -110,25 +110,25 @@ class BeerSpiderSpider(scrapy.Spider):
             item['rdev'] = comment.css('#rating_fullview_content_2 span').re('0000\;">(.*)</span')
             #scores
             scores = comment.css('#rating_fullview_content_2 span.muted::text').extract_first()
-            look = re.search('look: ([0-9\.]*) \|', scores).group(1)
+            look = re.search('look: ([0-9\.]*) \|', scores)
             if look is not None:
-                item['look'] = look
+                item['look'] = look.group(1)
 
-            smell = re.search('smell: ([0-9\.]*) \|', scores).group(1)
+            smell = re.search('smell: ([0-9\.]*) \|', scores)
             if smell is not None:
-                item['smell'] = smell
+                item['smell'] = smell.group(1)
 
-            taste = re.search('taste: ([0-9\.]*) \|', scores).group(1)
+            taste = re.search('taste: ([0-9\.]*) \|', scores)
             if taste is not None:
-                item['taste'] = taste
+                item['taste'] = taste.group(1)
 
-            feel = re.search('feel: ([0-9\.]*) \|', scores).group(1)
+            feel = re.search('feel: ([0-9\.]*) \|', scores)
             if feel is not None:
-                item['feel'] = feel    
+                item['feel'] = feel.group(1)
             
-            overall = re.search('overall: ([0-9\.]*)', scores).group(1)
+            overall = re.search('overall: ([0-9\.]*)', scores)
             if overall is not None:
-                item['overall'] = overall 
+                item['overall'] = overall.group(1)
 
             comment_text = comment.css('#rating_fullview_content_2').extract_first()
             comment_text = re.sub('<div id="rating.*</span><br><br>','',comment_text)
