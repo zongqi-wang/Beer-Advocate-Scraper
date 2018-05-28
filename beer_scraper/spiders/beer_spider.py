@@ -106,7 +106,7 @@ class BeerSpiderSpider(scrapy.Spider):
         for comment in response.css('#rating_fullview_content_2'):
             item = CommentItem()
             item['beer_number'] = url_list[-2]
-            item['ba_score'] = comment.css('#rating_fullview_content_2 span.BAscore_norm::text').extract()
+            item['ba_score'] = comment.css('#rating_fullview_content_2 span.BAscore_norm::text').extract ()
             item['rdev'] = comment.css('#rating_fullview_content_2 span').re('0000\;">(.*)</span')
             #scores
             scores = comment.css('#rating_fullview_content_2 span.muted::text').extract_first()
@@ -135,7 +135,7 @@ class BeerSpiderSpider(scrapy.Spider):
             item['comment'] = re.sub('<div><span class.*', '', comment_text)
 
             item['username'] = comment.css('div#rating_fullview_content_2 span.muted a.username::text').extract()
-            item['date'] = comment.css('div#rating_fullview_content_2 span.muted a::text').extract()[1]
+            item['date'] = comment.css('div#rating_fullview_content_2 span.muted a::text').extract()[-1]
             yield item
        
         #crawling next page if exist
