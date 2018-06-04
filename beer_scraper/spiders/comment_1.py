@@ -23,8 +23,11 @@ class BeerSpiderSpider(scrapy.Spider):
     #this function finds every brewery in the page and goes to the next page
     ############################################################################
     def parse(self, response):
-        for brewery in response.css('td a').re('href="(/beer/profile/.*)">'):
-            yield response.follow(brewery, self.parse_brewery)
+        rows = response.css("#ba-content tr")
+        for i in range(0,19):
+            if int(rows.css("td.hr_bottom_light b::text").extract()[i*4+3])>0:
+                brewery=rows.css('a').re('href="(/beer/profile/.*)">')[i]
+                yield response.follow(brewery, self.parse_brewery)
 
 
     
@@ -34,35 +37,34 @@ class BeerSpiderSpider(scrapy.Spider):
     def parse_brewery(self, response):
         stats = response.css('#item_stats dd::text').extract()
         #don't record information if 
-        if int(stats[0]) !=0:
-            brewery_info = BreweryInfoItem()
-            #brewery info
-            brewery_info['brewery_name'] = response.css('h1::text').extract()
-            brewery_info['brewery_number'] = response.url.split('/')[-2]
-            #beer stats
-            brewery_info['beers'] = stats[0]
-            brewery_info['beer_reviews'] = stats[1]
-            brewery_info['beer_ratings'] = stats[2]
-            brewery_info['beer_score'] = response.css('#score_box span.ba-ravg::text').extract()
-            #brewery stats
-            brewery_info['brewery_score'] = response.css('#item_stats dd a::text').extract()
-            brewery_info['brewery_review'] = response.css('#item_stats dd span.ba-reviews::text').extract()
-            brewery_info['brewery_ratings'] = response.css('#item_stats dd span.ba-ratings::text').extract_first()
-            pdev = response.css('#item_stats dd span.ba-pdev::text').extract_first()
+        # if int(stats) > 0:
+        brewery_info = BreweryInfoItem()
+        #brewery info
+        brewery_info['brewery_name'] = response.css('h1::text').extract()
+        brewery_info['brewery_number'] = response.url.split('/')[-2]
+        #beer stats
+        brewery_info['beers'] = stats[0]
+        brewery_info['beer_reviews'] = stats[1]
+        brewery_info['beer_ratings'] = stats[2]
+        brewery_info['beer_score'] = response.css('#score_box span.ba-ravg::text').extract()
+        #brewery stats
+        brewery_info['brewery_score'] = response.css('#item_stats dd a::text').extract()
+        brewery_info['brewery_review'] = response.css('#item_stats dd span.ba-reviews::text').extract()
+        brewery_info['brewery_ratings'] = response.css('#item_stats dd span.ba-ratings::text').extract_first()
+        pdev = response.css('#item_stats dd span.ba-pdev::text').extract_first()
+        if pdev:
             brewery_info['brewery_pdev'] = re.sub('[\n\t]*', '', pdev)
-            #getting location data
-            location = response.css('#info_box a').re('/place/.*>(.*)</a>')
-            brewery_info['city'] = location[0]
-            brewery_info['country'] = location[-1]
-            if len(location)>2:
-                brewery_info['province'] = location[-2]
-            #saving info
-            yield brewery_info
+        #getting location data
+        location = response.css('#info_box a').re('/place/.*>(.*)</a>')
+        brewery_info['city'] = location[0]
+        brewery_info['country'] = location[-1]
+        if len(location)>2:
+            brewery_info['province'] = location[-2]
+        #saving info
+        yield brewery_info
 
-            for beer in response.css('td.hr_bottom_light a').re('href="(/beer/profile/.*)">'):
-                yield response.follow(beer, self.parse_comment)
-        else:
-            pass
+        for beer in response.css('td.hr_bottom_light a').re('href="(/beer/profile/.*)">'):
+            yield response.follow(beer, self.parse_comment)
 
 
     #############################################################################
