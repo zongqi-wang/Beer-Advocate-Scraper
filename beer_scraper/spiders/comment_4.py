@@ -26,6 +26,11 @@ class BeerSpiderSpider(scrapy.Spider):
             if int(rows.css("td.hr_bottom_light b::text").extract()[i*4+3])>0:
                 brewery=rows.css('a').re('href="(/beer/profile/.*)">')[i]
                 yield response.follow(brewery, self.parse_brewery)
+        
+        next_page =  response.css('a').re('<a href="(.*)">next')
+        if next_page:
+            next_url = re.sub('&amp;', '&', next_page[0])
+            yield response.follow(next_url, self.parse)
 
 
     
