@@ -22,8 +22,9 @@ class BeerSpiderSpider(scrapy.Spider):
     ############################################################################
     def parse(self, response):
         rows = response.css("#ba-content tr")
-        for i in range(0,19):
-            if int(rows.css("td.hr_bottom_light b::text").extract()[i*4+3])>0:
+        listings = rows.css("td.hr_bottom_light b::text").extract()
+        for i in range(0,len(listings)/4):
+            if int(listings[i*4+3])>0:
                 brewery=rows.css('a').re('href="(/beer/profile/.*)">')[i]
                 yield response.follow(brewery, self.parse_brewery)
 
