@@ -1,4 +1,4 @@
-# Beer-Advocate-Scraper
+# Beer Advocate Scraper
 
 ### Info
 This scraper was built with python3 and scrapy 1.6.Install Scrapy with `pip install Scrapy`.
